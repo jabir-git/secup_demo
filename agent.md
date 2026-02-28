@@ -1,0 +1,2 @@
+framework=FastApi
+orm=sqlmodel
