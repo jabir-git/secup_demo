@@ -33,9 +33,15 @@ def _build_token_response(user: User) -> TokenResponse:
     )
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
+)
 def register(body: RegisterRequest, session: DbSession) -> TokenResponse:
-    if session.execute(select(User).where(User.username == body.username)).scalars().first():
+    if (
+        session.execute(select(User).where(User.username == body.username))
+        .scalars()
+        .first()
+    ):
         raise HTTPException(status_code=400, detail="Username already taken")
     if session.execute(select(User).where(User.email == body.email)).scalars().first():
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -55,9 +61,17 @@ def register(body: RegisterRequest, session: DbSession) -> TokenResponse:
 def login(body: LoginRequest, session: DbSession) -> TokenResponse:
     user: User | None = None
     if body.username:
-        user = session.execute(select(User).where(User.username == body.username)).scalars().first()
+        user = (
+            session.execute(select(User).where(User.username == body.username))
+            .scalars()
+            .first()
+        )
     elif body.email:
-        user = session.execute(select(User).where(User.email == body.email)).scalars().first()
+        user = (
+            session.execute(select(User).where(User.email == body.email))
+            .scalars()
+            .first()
+        )
 
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -92,7 +106,9 @@ def get_me(user: CurrentUser) -> User:
 
 
 @router.put("/me", response_model=UserProfile)
-def update_me(body: UpdateProfileRequest, user: CurrentUser, session: DbSession) -> User:
+def update_me(
+    body: UpdateProfileRequest, user: CurrentUser, session: DbSession
+) -> User:
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(user, field, value)
     session.add(user)

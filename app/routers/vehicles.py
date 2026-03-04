@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession, SupervisorUser
-from app.models.vehicle import Vehicle
+from app.models.vehicle import Vehicle, VehicleStatus
 from app.schemas.vehicle import SeizeRequest, VehicleCreate, VehicleRead, VehicleUpdate
 
 router = APIRouter(prefix="/api/vehicles", tags=["vehicles"])
@@ -19,7 +19,9 @@ def _get_vehicle_or_404(vehicle_id: int, session: DbSession) -> Vehicle:
 
 
 @router.post("/", response_model=VehicleRead, status_code=status.HTTP_201_CREATED)
-def create_vehicle(body: VehicleCreate, _user: CurrentUser, session: DbSession) -> Vehicle:
+def create_vehicle(
+    body: VehicleCreate, _user: CurrentUser, session: DbSession
+) -> Vehicle:
     vehicle = Vehicle(**body.model_dump())
     session.add(vehicle)
     session.commit()
@@ -89,7 +91,7 @@ def seize_vehicle(
     session: DbSession,
 ) -> Vehicle:
     vehicle = _get_vehicle_or_404(vehicle_id, session)
-    vehicle.status = "seized"
+    vehicle.status = VehicleStatus.seized
     vehicle.seizure_reason = body.seizure_reason
     vehicle.seizure_location = body.seizure_location
     vehicle.seizure_date = datetime.now(timezone.utc)
@@ -108,9 +110,9 @@ def release_vehicle(
     session: DbSession,
 ) -> Vehicle:
     vehicle = _get_vehicle_or_404(vehicle_id, session)
-    if vehicle.status != "seized":
+    if vehicle.status != VehicleStatus.seized:
         raise HTTPException(status_code=400, detail="Vehicle is not seized")
-    vehicle.status = "released"
+    vehicle.status = VehicleStatus.released
     vehicle.release_date = datetime.now(timezone.utc)
     vehicle.updated_at = datetime.now(timezone.utc)
     session.add(vehicle)
@@ -122,9 +124,9 @@ def release_vehicle(
 @router.patch("/{vehicle_id}/wanted", response_model=VehicleRead)
 def mark_wanted(
     vehicle_id: int,
+    _user: SupervisorUser,
+    session: DbSession,
     is_wanted: bool = Query(...),
-    _user: SupervisorUser = None,
-    session: DbSession = None,
 ) -> Vehicle:
     vehicle = _get_vehicle_or_404(vehicle_id, session)
     vehicle.is_wanted = is_wanted

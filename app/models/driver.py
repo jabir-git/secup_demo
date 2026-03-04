@@ -17,7 +17,9 @@ class Driver(Base):
     address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     city: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    license_number: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    license_number: Mapped[str] = mapped_column(
+        String(50), unique=True, index=True, nullable=False
+    )
     license_category: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     license_expiry: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     national_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)

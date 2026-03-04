@@ -17,7 +17,9 @@ from app.schemas.intervention import (
 router = APIRouter(prefix="/api/interventions", tags=["interventions"])
 
 
-def _get_intervention_or_404(intervention_id: int, user: CurrentUser, session: DbSession) -> Intervention:
+def _get_intervention_or_404(
+    intervention_id: int, user: CurrentUser, session: DbSession
+) -> Intervention:
     item = session.get(Intervention, intervention_id)
     if not item or item.is_deleted:
         raise HTTPException(status_code=404, detail="Intervention not found")
@@ -59,7 +61,9 @@ def list_interventions(
 
 
 @router.post("/", response_model=InterventionRead, status_code=status.HTTP_201_CREATED)
-def create_intervention(body: InterventionCreate, user: CurrentUser, session: DbSession) -> Intervention:
+def create_intervention(
+    body: InterventionCreate, user: CurrentUser, session: DbSession
+) -> Intervention:
     item = Intervention(**body.model_dump(), user_id=user.id)
     session.add(item)
     session.commit()
@@ -85,7 +89,9 @@ def update_intervention(
 
 
 @router.delete("/{intervention_id}")
-def delete_intervention(intervention_id: int, user: CurrentUser, session: DbSession) -> dict:
+def delete_intervention(
+    intervention_id: int, user: CurrentUser, session: DbSession
+) -> dict:
     item = _get_intervention_or_404(intervention_id, user, session)
     item.is_deleted = True
     item.updated_at = datetime.now(timezone.utc)

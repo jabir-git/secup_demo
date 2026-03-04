@@ -22,28 +22,38 @@ def get_current_user(
     session: Annotated[Session, Depends(get_session)],
 ) -> User:
     if is_blacklisted(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token revoked"
+        )
 
     payload = decode_token(token)
     if not payload or payload.get("type") != "access":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
 
     user = session.get(User, int(payload["sub"]))
     if not user or not user.is_active:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+        )
 
     return user
 
 
 def require_supervisor(user: Annotated[User, Depends(get_current_user)]) -> User:
     if user.role not in (UserRole.supervisor, UserRole.admin):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Supervisor or admin required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Supervisor or admin required"
+        )
     return user
 
 
 def require_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
     if user.role != UserRole.admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin required"
+        )
     return user
 
 

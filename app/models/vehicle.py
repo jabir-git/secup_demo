@@ -32,14 +32,26 @@ class Vehicle(Base):
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     color: Mapped[str] = mapped_column(String(50), nullable=False)
     vin: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    vehicle_type: Mapped[VehicleType] = mapped_column(default=VehicleType.voiture, nullable=False)
-    status: Mapped[VehicleStatus] = mapped_column(default=VehicleStatus.active, nullable=False)
+    vehicle_type: Mapped[VehicleType] = mapped_column(
+        default=VehicleType.voiture, nullable=False
+    )
+    status: Mapped[VehicleStatus] = mapped_column(
+        default=VehicleStatus.active, nullable=False
+    )
     seizure_reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    seizure_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    seizure_date: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     seizure_location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    release_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    driver_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("drivers.id"), nullable=True)
-    seized_by_user_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    release_date: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    driver_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("drivers.id"), nullable=True
+    )
+    seized_by_user_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True
+    )
     is_wanted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

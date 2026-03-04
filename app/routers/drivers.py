@@ -20,7 +20,13 @@ def _get_driver_or_404(driver_id: int, session: DbSession) -> Driver:
 
 @router.post("/", response_model=DriverRead, status_code=status.HTTP_201_CREATED)
 def create_driver(body: DriverCreate, _user: CurrentUser, session: DbSession) -> Driver:
-    if session.execute(select(Driver).where(Driver.license_number == body.license_number)).scalars().first():
+    if (
+        session.execute(
+            select(Driver).where(Driver.license_number == body.license_number)
+        )
+        .scalars()
+        .first()
+    ):
         raise HTTPException(status_code=400, detail="License number already exists")
     driver = Driver(**body.model_dump())
     session.add(driver)
@@ -48,10 +54,18 @@ def search_drivers(q: str, _user: CurrentUser, session: DbSession) -> list[Drive
 
 
 @router.get("/by-license/{license_number}", response_model=DriverRead)
-def get_by_license(license_number: str, _user: CurrentUser, session: DbSession) -> Driver:
-    driver = session.execute(
-        select(Driver).where(Driver.license_number == license_number, Driver.is_deleted == False)  # noqa: E712
-    ).scalars().first()
+def get_by_license(
+    license_number: str, _user: CurrentUser, session: DbSession
+) -> Driver:
+    driver = (
+        session.execute(
+            select(Driver).where(
+                Driver.license_number == license_number, Driver.is_deleted == False
+            )  # noqa: E712
+        )
+        .scalars()
+        .first()
+    )
     if not driver:
         raise HTTPException(status_code=404, detail="Driver not found")
     return driver
