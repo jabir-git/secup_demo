@@ -40,7 +40,7 @@ def search_drivers(q: str, _user: CurrentUser, session: DbSession) -> list[Drive
     stmt = (
         select(Driver)
         .where(
-            Driver.is_deleted == False,  # noqa: E712
+            ~Driver.is_deleted,
             or_(
                 Driver.first_name.contains(q),
                 Driver.last_name.contains(q),
@@ -60,8 +60,8 @@ def get_by_license(
     driver = (
         session.execute(
             select(Driver).where(
-                Driver.license_number == license_number, Driver.is_deleted == False
-            )  # noqa: E712
+                Driver.license_number == license_number, ~Driver.is_deleted
+            )
         )
         .scalars()
         .first()
