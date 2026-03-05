@@ -37,7 +37,7 @@ def list_interventions(
 ) -> InterventionListResponse:
     stmt = (
         select(Intervention)
-        .where(Intervention.is_deleted == False)  # noqa: E712
+        .where(~Intervention.is_deleted)
         .order_by(Intervention.id.desc())
     )
     if user.role == UserRole.agent:

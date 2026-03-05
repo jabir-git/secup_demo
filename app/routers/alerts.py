@@ -30,7 +30,7 @@ def list_alerts(
     limit: int = 10,
     license_plate: Optional[str] = None,
 ) -> AlertListResponse:
-    base = select(Alert).where(Alert.is_deleted == False)  # noqa: E712
+    base = select(Alert).where(~Alert.is_deleted)
     if user.role == UserRole.agent:
         base = base.where(Alert.user_id == user.id)
     if license_plate:

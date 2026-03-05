@@ -37,7 +37,7 @@ def search_vehicles(
 ) -> list[Vehicle]:
     stmt = (
         select(Vehicle)
-        .where(Vehicle.license_plate.contains(plate), Vehicle.is_deleted == False)  # noqa: E712
+        .where(Vehicle.license_plate.contains(plate), ~Vehicle.is_deleted)
         .limit(10)
     )
     return list(session.execute(stmt).scalars().all())
@@ -48,7 +48,7 @@ def list_wanted(
     _user: CurrentUser,
     session: DbSession,
 ) -> list[Vehicle]:
-    stmt = select(Vehicle).where(Vehicle.is_wanted == True, Vehicle.is_deleted == False)  # noqa: E712
+    stmt = select(Vehicle).where(Vehicle.is_wanted, ~Vehicle.is_deleted)
     return list(session.execute(stmt).scalars().all())
 
 

@@ -8,13 +8,9 @@ from sqlalchemy import select
 
 from app.core.security import hash_password
 from app.database import create_db_tables, get_session
-from app.models import (  # noqa: F401 — populate Base.metadata
-    Alert,
-    Driver,
-    Intervention,
+from app.models import (
     User,
     UserRole,
-    Vehicle,
 )
 from app.routers import alerts, auth, drivers, interventions, vehicles
 
