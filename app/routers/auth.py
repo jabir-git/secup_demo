@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
 
 from app.core.deps import CurrentToken, CurrentUser, DbSession
+from app.core.limiter import limiter
 from app.core.security import (
     blacklist_token,
     create_access_token,
@@ -16,7 +17,6 @@ from app.schemas.auth import (
     RefreshRequest,
     RegisterRequest,
     TokenResponse,
-    UpdateProfileRequest,
     UserProfile,
 )
 
@@ -58,25 +58,15 @@ def register(body: RegisterRequest, session: DbSession) -> TokenResponse:
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, session: DbSession) -> TokenResponse:
-    user: User | None = None
-    if body.username:
-        user = (
-            session.execute(select(User).where(User.username == body.username))
-            .scalars()
-            .first()
-        )
-    elif body.email:
-        user = (
-            session.execute(select(User).where(User.email == body.email))
-            .scalars()
-            .first()
-        )
-
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest, session: DbSession) -> TokenResponse:
+    user = (
+        session.execute(select(User).where(User.email == body.email))
+        .scalars()
+        .first()
+    )
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    if not user.is_active:
-        raise HTTPException(status_code=401, detail="Account is disabled")
 
     return _build_token_response(user)
 
@@ -88,7 +78,7 @@ def refresh(body: RefreshRequest, session: DbSession) -> TokenResponse:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     user = session.get(User, int(payload["sub"]))
-    if not user or not user.is_active:
+    if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
     return _build_token_response(user)
@@ -102,16 +92,4 @@ def logout(token: CurrentToken, _user: CurrentUser) -> dict:
 
 @router.get("/me", response_model=UserProfile)
 def get_me(user: CurrentUser) -> User:
-    return user
-
-
-@router.put("/me", response_model=UserProfile)
-def update_me(
-    body: UpdateProfileRequest, user: CurrentUser, session: DbSession
-) -> User:
-    for field, value in body.model_dump(exclude_none=True).items():
-        setattr(user, field, value)
-    session.add(user)
-    session.commit()
-    session.refresh(user)
     return user

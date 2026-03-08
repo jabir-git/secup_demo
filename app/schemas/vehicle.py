@@ -1,59 +1,54 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
-
-from app.models.vehicle import VehicleStatus, VehicleType
 
 
 class VehicleCreate(BaseModel):
     license_plate: str
-    make: str
-    model: str
-    year: int
-    color: str
-    vin: Optional[str] = None
-    vehicle_type: VehicleType = VehicleType.voiture
-    driver_id: Optional[int] = None
-    is_wanted: bool = False
+    vehicle_info: Optional[str] = None
+    notes: Optional[str] = None
+    status: str = "normal"
+    event_type: Optional[str] = None
+    driver_full_name: Optional[str] = None
+    driver_license_number: Optional[str] = None
+    driver_phone: Optional[str] = None
 
 
 class VehicleUpdate(BaseModel):
     license_plate: Optional[str] = None
-    make: Optional[str] = None
-    model: Optional[str] = None
-    year: Optional[int] = None
-    color: Optional[str] = None
-    vin: Optional[str] = None
-    vehicle_type: Optional[VehicleType] = None
-    driver_id: Optional[int] = None
-    is_wanted: Optional[bool] = None
+    vehicle_info: Optional[str] = None
+    notes: Optional[str] = None
+    status: Optional[str] = None
+    event_type: Optional[str] = None
+    driver_full_name: Optional[str] = None
+    driver_license_number: Optional[str] = None
+    driver_phone: Optional[str] = None
 
 
 class VehicleRead(BaseModel):
     id: int
     license_plate: str
-    make: str
-    model: str
-    year: int
-    color: str
-    vin: Optional[str] = None
-    vehicle_type: VehicleType
-    status: VehicleStatus
-    seizure_reason: Optional[str] = None
-    seizure_date: Optional[datetime] = None
-    seizure_location: Optional[str] = None
-    release_date: Optional[datetime] = None
-    driver_id: Optional[int] = None
-    seized_by_user_id: Optional[int] = None
-    is_wanted: bool
-    is_deleted: bool
+    vehicle_info: Optional[str] = None
+    notes: Optional[str] = None
+    status: str
+    event_type: Optional[str] = None
+    driver_full_name: Optional[str] = None
+    driver_license_number: Optional[str] = None
+    driver_phone: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
 
 
-class SeizeRequest(BaseModel):
-    seizure_reason: str
-    seizure_location: str
+class BatchStatusUpdate(BaseModel):
+    ids: List[int]
+    status: str
+
+
+class VehicleListResponse(BaseModel):
+    items: List[VehicleRead]
+    limit: int
+    next_cursor: Optional[int] = None
+    has_more: bool

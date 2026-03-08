@@ -23,9 +23,6 @@ build/
 *.db
 *.sqlite3
 
-# Alembic (keep versions, ignore cache)
-alembic/__pycache__/
-
 # Environment variables
 .env
 .env.*

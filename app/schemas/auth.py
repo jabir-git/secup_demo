@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field
 
 
 class RegisterRequest(BaseModel):
@@ -11,15 +10,8 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    username: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: EmailStr
     password: str
-
-    @model_validator(mode="after")
-    def check_username_or_email(self) -> "LoginRequest":
-        if not self.username and not self.email:
-            raise ValueError("username or email is required")
-        return self
 
 
 class RefreshRequest(BaseModel):
@@ -40,17 +32,6 @@ class UserProfile(BaseModel):
     id: int
     username: str
     email: str
-    role: str
-    badge_number: Optional[str] = None
-    phone: Optional[str] = None
-    department: Optional[str] = None
-    is_active: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}
-
-
-class UpdateProfileRequest(BaseModel):
-    badge_number: Optional[str] = None
-    phone: Optional[str] = None
-    department: Optional[str] = None
